@@ -431,12 +431,12 @@ let popupActive = false;
 
 function showHeartMessage (text) {
     popupText.textContent = text;
-    popup.classList.remove ("hidden");
+    popup.style.display = "block";
     popupActive = true;
 }
 
 closePopup.addEventListener ("click", () => {
-    popup.classList.add ("hidden");
+    popup.style.display = "none";
     popupActive = false;
 });
 

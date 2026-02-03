@@ -1,44 +1,40 @@
 body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #ffe4e1; 
-    font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #ffe4e1; 
+  font-family: 'Arial', sans-serif;
 }
 
 canvas {
-    border: 2px solid #ff69b4;
-    background-color: #fff0f5;
+  border: 2px solid #ff69b4;
+  background-color: #fff0f5;
 }
 
-.popup {
-  position: absolute;
-  top: 50%;
+#heartPopup {
+  position: absolute;     
+  top: 50%; 
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 300px;
-  padding: 20px;
-  background: #fff0f5;
-  border: 3px solid #ff69b4;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 3px solid #ff1493;
+  padding: 20px 30px;
+  border-radius: 15px;
   text-align: center;
-  font-family: Arial, sans-serif;
-  z-index: 10;
+  z-index: 1000;           
+  display: none;          
 }
 
-.popup button {
-  position: absolute;
-  top: 6px;
-  right: 8px;
+#heartPopup button {
+  margin-top: 15px;
+  padding: 5px 15px;
+  border-radius: 10px;
+  background-color: #ff69b4;
   border: none;
-  background: none;
-  font-size: 18px;
+  color: white;
+  font-weight: bold;
   cursor: pointer;
-}
-
-.hidden {
-  display: none;
 }
