@@ -74,7 +74,7 @@ const objectsByArea = {
             height: 150,
             revealed: false,
             imgSrc: "backgrounds/area1/Rock.png",
-            message: "I like your piercings"
+            message: "I like your piercings and tattoos"
         },
         {
             x: 20,
