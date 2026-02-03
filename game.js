@@ -58,7 +58,7 @@ character.sprites.right.walking.src = "sprites/Walking-Right.png";
 character.sprites.right.sitting.src = "sprites/Sitting-Right.png";
 
 const heartImg = new Image ();
-heartImg.src = "sprites/heart.png";
+heartImg.src = "sprites/Heart.png";
 
 let heartsCollected = 0;
 let activeHearts = [];
