@@ -156,11 +156,11 @@ if (isMobile) {
     // character.x = 120;
     // character.y = 605;
 
-    objectsByArea.GrassArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
-    objectsByArea.SandArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
-    objectsByArea.PondArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
-    character.x *= scale;
-    character.y *= scale;
+    // objectsByArea.GrassArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
+    // objectsByArea.SandArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
+    // objectsByArea.PondArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
+    // character.x *= scale;
+    // character.y *= scale;
 }
 
 Object.values (objectsByArea).forEach (areaObjects => {
