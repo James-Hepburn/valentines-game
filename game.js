@@ -132,29 +132,35 @@ const objectsByArea = {
 };
 
 if (isMobile) {
-    objectsByArea.GrassArea [0].y = 0;
-    objectsByArea.GrassArea [2].x = 150;
-    objectsByArea.GrassArea [2].y = 250;
-    objectsByArea.GrassArea [3].x = 200;
-    objectsByArea.GrassArea [3].y = 400;
+    // objectsByArea.GrassArea [0].y = 0;
+    // objectsByArea.GrassArea [2].x = 150;
+    // objectsByArea.GrassArea [2].y = 250;
+    // objectsByArea.GrassArea [3].x = 200;
+    // objectsByArea.GrassArea [3].y = 400;
 
-    objectsByArea.PondArea [0].x = 50;
-    objectsByArea.PondArea [0].y = 500;
-    objectsByArea.PondArea [1].x = 90;
-    objectsByArea.PondArea [2].x = 200;
-    objectsByArea.PondArea [3].x = 230;
-    objectsByArea.PondArea [3].y = 350;
+    // objectsByArea.PondArea [0].x = 50;
+    // objectsByArea.PondArea [0].y = 500;
+    // objectsByArea.PondArea [1].x = 90;
+    // objectsByArea.PondArea [2].x = 200;
+    // objectsByArea.PondArea [3].x = 230;
+    // objectsByArea.PondArea [3].y = 350;
 
-    objectsByArea.SandArea [0].y = 600;
-    objectsByArea.SandArea [1].y = 500;
-    objectsByArea.SandArea [2].x = 200;
-    objectsByArea.SandArea [2].y = 150;
-    objectsByArea.SandArea [3].x = 100;
-    objectsByArea.SandArea [3].y = 350;
-    objectsByArea.SandArea [4].y = 100;
+    // objectsByArea.SandArea [0].y = 600;
+    // objectsByArea.SandArea [1].y = 500;
+    // objectsByArea.SandArea [2].x = 200;
+    // objectsByArea.SandArea [2].y = 150;
+    // objectsByArea.SandArea [3].x = 100;
+    // objectsByArea.SandArea [3].y = 350;
+    // objectsByArea.SandArea [4].y = 100;
 
-    character.x = 120;
-    character.y = 605;
+    // character.x = 120;
+    // character.y = 605;
+
+    objectsByArea.GrassArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
+    objectsByArea.SandArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
+    objectsByArea.PondArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
+    character.x *= scale;
+    character.y *= scale;
 }
 
 Object.values (objectsByArea).forEach (areaObjects => {
