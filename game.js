@@ -1,6 +1,51 @@
 const canvas = document.getElementById ("gameCanvas");
 const ctx = canvas.getContext ("2d");
 
+const keys = {};
+
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test (navigator.userAgent);
+const mobileControls = document.getElementById ('mobile-controls');
+
+if (isMobile) {
+    canvas.width = window.innerWidth * 0.8;
+    canvas.height = window.innerHeight * 0.8;
+
+    mobileControls.style.display = 'block';
+
+    const buttons = ['left', 'right', 'up', 'down', 'action'];
+    buttons.forEach(id => {
+        const btn = document.getElementById(id);
+
+        btn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            if (id === 'action') {
+                const event = new KeyboardEvent('keydown', { 'key': 'e' });
+                document.dispatchEvent(event);
+            } else {
+                keys['Arrow' + id.charAt(0).toUpperCase() + id.slice(1)] = true;
+            }
+        });
+
+        btn.addEventListener('pointerup', (e) => {
+            e.preventDefault();
+            if (id !== 'action') {
+                keys['Arrow' + id.charAt(0).toUpperCase() + id.slice(1)] = false;
+            }
+        });
+
+        btn.addEventListener('pointerleave', (e) => {
+            e.preventDefault();
+            if (id !== 'action') {
+                keys['Arrow' + id.charAt(0).toUpperCase() + id.slice(1)] = false;
+            }
+        });
+    });
+}
+
+const scaleX = canvas.width / 500;
+const scaleY = canvas.height / 500;
+const scale = Math.min (scaleX, scaleY);
+
 const bgMusic = new Audio ("sounds/Background.ogg");
 bgMusic.loop = true;
 bgMusic.volume = 0.15;
@@ -47,18 +92,12 @@ heartImg.src = "sprites/Heart.png";
 let heartsCollected = 0;
 let activeHearts = [];
 
-// ==========================
-// GAME STATE
-// ==========================
 let gameState = "title";
 let currentArea = "MainArea";
 let musicStarted = false;
 let titleBounceFrame = 0;
 let cutsceneStartTime = 0;
 
-// ==========================
-// AREAS & OBJECTS
-// ==========================
 const areas = {
     MainArea: { bg: "backgrounds/MainArea.png", exits: { top: "GrassArea", left: "SandArea", right: "PondArea" } },
     GrassArea: { bg: "backgrounds/GrassArea.png", exits: { bottom: "MainArea" } },
@@ -92,7 +131,32 @@ const objectsByArea = {
     ]
 };
 
-// Preload object images
+if (isMobile) {
+    objectsByArea.GrassArea [0].y = 0;
+    objectsByArea.GrassArea [2].x = 150;
+    objectsByArea.GrassArea [2].y = 250;
+    objectsByArea.GrassArea [3].x = 200;
+    objectsByArea.GrassArea [3].y = 400;
+
+    objectsByArea.PondArea [0].x = 50;
+    objectsByArea.PondArea [0].y = 500;
+    objectsByArea.PondArea [1].x = 90;
+    objectsByArea.PondArea [2].x = 200;
+    objectsByArea.PondArea [3].x = 230;
+    objectsByArea.PondArea [3].y = 350;
+
+    objectsByArea.SandArea [0].y = 600;
+    objectsByArea.SandArea [1].y = 500;
+    objectsByArea.SandArea [2].x = 200;
+    objectsByArea.SandArea [2].y = 150;
+    objectsByArea.SandArea [3].x = 100;
+    objectsByArea.SandArea [3].y = 350;
+    objectsByArea.SandArea [4].y = 100;
+
+    character.x = 120;
+    character.y = 605;
+}
+
 Object.values (objectsByArea).forEach (areaObjects => {
     areaObjects.forEach (obj => {
         obj.img = new Image ();
@@ -100,14 +164,9 @@ Object.values (objectsByArea).forEach (areaObjects => {
     });
 });
 
-// ==========================
-// INPUT HANDLING
-// ==========================
-const keys = {};
 document.addEventListener ('keydown', e => keys [e.key] = true);
 document.addEventListener ('keyup', e => keys [e.key] = false);
 
-// Interaction with objects
 document.addEventListener ('keydown', e => {
     if (gameState !== "playing") return;
     if (e.key.toLowerCase () !== 'e') return;
@@ -144,8 +203,8 @@ let mouseX = 0;
 let mouseY = 0;
 canvas.addEventListener ("mousemove", (e) => {
     const rect = canvas.getBoundingClientRect ();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
+    mouseX = (e.clientX - rect.left) / scale;
+    mouseY = (e.clientY - rect.top) / scale;
 });
 
 const popup = document.getElementById ("heartPopup");
@@ -194,7 +253,12 @@ function drawTitleScreen () {
     ctx.fillRect (0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = "#ff1493"; 
-    ctx.font = "36px Arial";
+
+    if (isMobile) {
+        ctx.font = "24px Arial";
+    } else {
+        ctx.font = "36px Arial";
+    }
     ctx.textAlign = "center";
 
     const bounce = Math.sin (titleBounceFrame * 0.15) * 5;
@@ -259,7 +323,13 @@ function drawStartCutscene () {
     ctx.fillRect (0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = `rgba(255,20,147,${alpha})`;
-    ctx.font = "24px Arial";
+
+    if (isMobile) {
+        ctx.font = "14px Arial";
+    } else {
+        ctx.font = "24px Arial";
+    }
+
     ctx.textAlign = "center";
     ctx.fillText ("Instructions:", canvas.width / 2, canvas.height / 2 - 125);
     ctx.textAlign = "left";
@@ -274,7 +344,13 @@ function drawEndCutscene () {
     ctx.fillRect (0, 0, canvas.width, canvas.height);
 
     ctx.fillStyle = "#ff1493";
-    ctx.font = "48px Arial";
+
+    if (isMobile) {
+        ctx.font = "24px Arial";
+    } else {
+        ctx.font = "48px Arial";
+    }
+
     ctx.textAlign = "center";
     ctx.fillText ("Happy", canvas.width / 2, canvas.height / 2 - 150);
     ctx.fillText ("Valentine's", canvas.width / 2, canvas.height / 2 - 80);
@@ -315,7 +391,7 @@ function updateGame () {
     activeHearts.forEach ((heart, index) => {
         ctx.save ();
         ctx.globalAlpha = heart.alpha;
-        ctx.drawImage (heartImg, heart.x - heart.size / 2, heart.y - heart.size / 2, heart.size, heart.size);
+        ctx.drawImage (heartImg, heart.x - (heart.size / 2), heart.y - (heart.size / 2), heart.size, heart.size);
         ctx.restore ();
 
         heart.size += heart.growthRate;
@@ -329,9 +405,14 @@ function updateGame () {
         }
     });
 
-    if (heartsCollected === 14 && character.x > 190 && character.x < 250 && character.y > 420) {
-        gameState = "gameover";
-        return;
+    if (heartsCollected === 14) {
+        if (!isMobile && character.x > 190 && character.x < 250 && character.y > 420) {
+            gameState = "gameover";
+            return;
+        } else if (isMobile && character.x > 100 && character.x < 160 && character.y > 600) {
+            gameState = "gameover";
+            return;
+        }
     }
 
     ctx.fillStyle = "#ff1493"; 
