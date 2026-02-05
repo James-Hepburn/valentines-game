@@ -9,42 +9,35 @@ const mobileControls = document.getElementById ('mobile-controls');
 if (isMobile) {
     canvas.width = window.innerWidth * 0.8;
     canvas.height = window.innerHeight * 0.8;
-
-    mobileControls.style.display = 'block';
-
-    const buttons = ['left', 'right', 'up', 'down', 'action'];
-    buttons.forEach(id => {
-        const btn = document.getElementById(id);
-
-        btn.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            if (id === 'action') {
-                const event = new KeyboardEvent('keydown', { 'key': 'e' });
-                document.dispatchEvent(event);
-            } else {
-                keys['Arrow' + id.charAt(0).toUpperCase() + id.slice(1)] = true;
-            }
-        });
-
-        btn.addEventListener('pointerup', (e) => {
-            e.preventDefault();
-            if (id !== 'action') {
-                keys['Arrow' + id.charAt(0).toUpperCase() + id.slice(1)] = false;
-            }
-        });
-
-        btn.addEventListener('pointerleave', (e) => {
-            e.preventDefault();
-            if (id !== 'action') {
-                keys['Arrow' + id.charAt(0).toUpperCase() + id.slice(1)] = false;
-            }
-        });
-    });
 }
 
 const scaleX = canvas.width / 500;
 const scaleY = canvas.height / 500;
 const scale = Math.min (scaleX, scaleY);
+
+const notes = [
+  "I like your piercings and tattoos",
+  "I'm excited to see Motley Crue with you",
+  "I think you're really pretty",
+  "I love spending time with you",
+  "I'm really glad we met",
+  "You make me smile",
+  "I like you",
+  "Kissing you is a lot of fun",
+  "You're cute",
+  "I like joking around with you",
+  "Being around you feels good",
+  "Hi",
+  "You're on my mind a lot",
+  "I like your eyes",
+  "Happy Valentine's Day!"
+];
+
+let noteIndex = 0;
+const mobileArrows = {
+  left: { x: 30, y: 0, w: 60, h: 60 },
+  right: { x: 0, y: 0, w: 60, h: 60 }
+};
 
 const bgMusic = new Audio ("sounds/Background.ogg");
 bgMusic.loop = true;
@@ -130,38 +123,6 @@ const objectsByArea = {
         { x: 400, y: 280, width: 70, height: 70, revealed: false, imgSrc: "backgrounds/area3/Duck.png", message: "I like your eyes" }
     ]
 };
-
-if (isMobile) {
-    // objectsByArea.GrassArea [0].y = 0;
-    // objectsByArea.GrassArea [2].x = 150;
-    // objectsByArea.GrassArea [2].y = 250;
-    // objectsByArea.GrassArea [3].x = 200;
-    // objectsByArea.GrassArea [3].y = 400;
-
-    // objectsByArea.PondArea [0].x = 50;
-    // objectsByArea.PondArea [0].y = 500;
-    // objectsByArea.PondArea [1].x = 90;
-    // objectsByArea.PondArea [2].x = 200;
-    // objectsByArea.PondArea [3].x = 230;
-    // objectsByArea.PondArea [3].y = 350;
-
-    // objectsByArea.SandArea [0].y = 600;
-    // objectsByArea.SandArea [1].y = 500;
-    // objectsByArea.SandArea [2].x = 200;
-    // objectsByArea.SandArea [2].y = 150;
-    // objectsByArea.SandArea [3].x = 100;
-    // objectsByArea.SandArea [3].y = 350;
-    // objectsByArea.SandArea [4].y = 100;
-
-    // character.x = 120;
-    // character.y = 605;
-
-    // objectsByArea.GrassArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
-    // objectsByArea.SandArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
-    // objectsByArea.PondArea.forEach (obj => { obj.x *= scale; obj.y *= scale; });
-    // character.x *= scale;
-    // character.y *= scale;
-}
 
 Object.values (objectsByArea).forEach (areaObjects => {
     areaObjects.forEach (obj => {
@@ -274,7 +235,9 @@ function drawTitleScreen () {
     const btnY = canvas.height / 2;
     const btnWidth = 150;
     const btnHeight = 50;
-    let btnColor = (mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY && mouseY <= btnY + btnHeight) ? "#ff85c1" : "#ff69b4";
+
+    let isHover = !isMobile && mouseX >= btnX && mouseX <= btnX + btnWidth && mouseY >= btnY && mouseY <= btnY + btnHeight;
+    let btnColor = (isHover || playButtonActive) ? "#ff85c1" : "#ff69b4";
 
     drawRoundedRect (btnX, btnY, btnWidth, btnHeight, 15, btnColor, "#000");
 
@@ -307,12 +270,78 @@ canvas.addEventListener ("click", (e) => {
 
     if (gameState !== "title") return;
 
-    if (mouseX >= canvas.width / 2 - 75 && mouseX <= canvas.width / 2 + 75 &&
-        mouseY >= canvas.height / 2 && mouseY <= canvas.height / 2 + 50) {
+    if (mouseX >= canvas.width / 2 - 75 && mouseX <= canvas.width / 2 + 75 && mouseY >= canvas.height / 2 && mouseY <= canvas.height / 2 + 50) {
+        if (!musicStarted) { bgMusic.play (); musicStarted = true; }
+
+        if (isMobile) {
+            gameState = "mobile";
+            return;
+        }
+
         gameState = "cutscene";
         cutsceneStartTime = Date.now ();
+    }
+});
 
-        if (!musicStarted) { bgMusic.play (); musicStarted = true; }
+let activeArrow = null;
+let playButtonActive = false;
+
+canvas.addEventListener ("pointerdown", (e) => {
+    const rect = canvas.getBoundingClientRect ();
+
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    activeArrow = null;
+
+    if (gameState === "mobile") {
+        if (isInside (mobileArrows.left, x, y)) {
+            noteIndex = Math.max (0, noteIndex - 1);
+            heartSound.currentTime = 0;
+            heartSound.play ();
+        } else if (isInside (mobileArrows.right, x, y)) {
+            noteIndex = Math.min (notes.length - 1, noteIndex + 1);
+            heartSound.currentTime = 0;
+            heartSound.play ();
+        }
+    }
+});
+
+canvas.addEventListener ("pointerup", () => {
+    activeArrow = null;
+});
+
+canvas.addEventListener ("pointerleave", () => {
+    activeArrow = null;
+});
+
+function isInside (btn, x, y) {
+    return (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h);
+}
+
+canvas.addEventListener ("pointermove", (e) => {
+    const btnX = canvas.width / 2 - 75;
+    const btnY = canvas.height / 2;
+    const btnWidth = 150;
+    const btnHeight = 50;
+
+    const rect = canvas.getBoundingClientRect ();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    
+    playButtonActive = (x >= btnX && x <= btnX + btnWidth && y >= btnY && y <= btnY + btnHeight);
+
+    if (gameState === "mobile") {
+        if (isInside (mobileArrows.left, x, y)) {
+            activeArrow = "left";
+        } else if (isInside (mobileArrows.right, x, y)) {
+            activeArrow = "right";
+        } else {
+            activeArrow = null;
+        }
     }
 });
 
@@ -427,13 +456,91 @@ function updateGame () {
     ctx.fillText(`${heartsCollected} / 14`, canvas.width - 20, 30);
 }
 
+function wrapText (text, x, y, maxWidth, lineHeight) {
+    const words = text.split (" ");
+    let line = "";
+    let lines = [];
+
+    for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[ i] + " ";
+        const metrics = ctx.measureText (testLine);
+
+        if (metrics.width > maxWidth && i > 0) {
+            lines.push (line);
+            line = words[ i] + " ";
+        } else {
+            line = testLine;
+        }
+    }
+    lines.push (line);
+
+    const startY = y - (lines.length - 1) * lineHeight / 2;
+    lines.forEach ((l, i) => {
+        ctx.fillText (l, x, startY + i * lineHeight);
+    });
+}
+
+function drawArrow (btn, direction, isActive) {
+    ctx.save ();
+
+    ctx.fillStyle = isActive ? "#ff85c1" : "#ff69b4";
+    ctx.fillRect (btn.x, btn.y, btn.w, btn.h);
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 3;
+    ctx.strokeRect (btn.x, btn.y, btn.w, btn.h);
+
+    ctx.fillStyle = "#000";
+    ctx.beginPath ();
+
+    if (direction === "left") {
+        ctx.moveTo (btn.x + btn.w * 0.65, btn.y + btn.h * 0.2);
+        ctx.lineTo (btn.x + btn.w * 0.35, btn.y + btn.h * 0.5);
+        ctx.lineTo (btn.x + btn.w * 0.65, btn.y + btn.h * 0.8);
+    } else {
+        ctx.moveTo (btn.x + btn.w * 0.35, btn.y + btn.h * 0.2);
+        ctx.lineTo (btn.x + btn.w * 0.65, btn.y + btn.h * 0.5);
+        ctx.lineTo (btn.x + btn.w * 0.35, btn.y + btn.h * 0.8);
+    }
+
+    ctx.closePath ();
+    ctx.fill ();
+
+    ctx.restore ();
+}
+
+function drawMobile () {
+    ctx.fillStyle = "#f0abff";
+    ctx.fillRect (0, 0, canvas.width, canvas.height);
+
+    const time = Date.now () * 0.005;
+    const heartSize = 80 + Math.sin (time) * 10; 
+    ctx.drawImage (heartImg, canvas.width / 2 - heartSize / 2, canvas.height / 2 + 100 - heartSize / 2, heartSize, heartSize);
+
+    ctx.fillStyle = "#ff1493";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "24px Arial";
+
+    const message = notes [noteIndex];
+    wrapText (message, canvas.width / 2, canvas.height / 2 - 100, canvas.width - 60, 32);
+
+    mobileArrows.left.y = canvas.height - 90;
+    mobileArrows.right.x = canvas.width - 90;
+    mobileArrows.right.y = canvas.height - 90;
+
+    drawArrow (mobileArrows.left, "left", activeArrow === "left");
+    drawArrow (mobileArrows.right, "right", activeArrow === "right");
+}
+
 function gameLoop () {
     ctx.clearRect (0, 0, canvas.width, canvas.height);
 
     if (gameState === "title") drawTitleScreen ();
     else if (gameState === "cutscene") drawStartCutscene ();
     else if (gameState === "playing") updateGame ();
-    else if (gameState === "gameover") drawEndCutscene();
+    else if (gameState === "gameover") drawEndCutscene ();
+    else if (gameState === "mobile") drawMobile ();
 
     requestAnimationFrame (gameLoop);
 }

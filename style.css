@@ -12,6 +12,7 @@ body {
 canvas {
   border: 2px solid #ff69b4;
   background-color: #fff0f5;
+  touch-action: none;
 }
 
 #heartPopup {
@@ -39,18 +40,9 @@ canvas {
   cursor: pointer;
 }
 
-#mobile-controls button {
-  width: 40px;     
-  height: 40px;       
-  font-size: 20px;   
-  margin: 5px;       
-  border-radius: 10px;
-  background-color: #ff69b4; 
-  color: #fff;
-  border: none;
-  outline: none;
-}
-
-#mobile-controls button:active {
-  background-color: #ff1493; 
+#noteDisplay {
+  font-size: 1.4rem;
+  text-align: center;
+  padding: 20px;
+  color: white;
 }
